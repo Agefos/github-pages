@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Géolocalisation Ville -> Département</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            margin: 5px 0;
+            padding: 8px;
+            width: 300px;
+        }
+
+        #department {
+            background-color: #f1f1f1;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h2>Récupérer le Département à partir de la Ville</h2>
+    <form>
+        <label for="city">Ville :</label>
+        <input type="text" id="city" placeholder="Entrez une ville" />
+        <br><br>
+        <label for="department">Département :</label>
+        <input type="text" id="department" placeholder="Département" readonly />
+    </form>
+
+    <script>
+        // Fonction pour appeler l'API avec la ville
+        function getDepartment(city) {
+            const apiKey = '7cf2e1314da44b68a70234c5ff9342a9';  // Remplacez par votre clé API OpenCage
+            const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${city}&key=${apiKey}&language=fr&pretty=1`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        const department = data.results[0].components.state_code;  // Récupère le code du département
+                        document.getElementById("department").value = department || "Département non trouvé";
+                    } else {
+                        document.getElementById("department").value = "Ville non trouvée";
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur de géolocalisation:", error);
+                    document.getElementById("department").value = "Erreur de récupération";
+                });
+        }
+
+        // Écoute l'entrée de l'utilisateur dans le champ Ville
+        document.getElementById("city").addEventListener("input", function() {
+            const city = this.value.trim();
+            if (city.length > 2) {  // Se déclenche après 2 caractères minimum
+                getDepartment(city);
+            } else {
+                document.getElementById("department").value = "";
+            }
+        });
+    </script>
+</body>
+</html>
